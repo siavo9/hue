@@ -1,0 +1,496 @@
+/* =========================================================
+   Hue — single stylesheet. Mobile-first. iOS 17 vibe.
+   ========================================================= */
+
+:root {
+  --bg-1: #1e1145;
+  --bg-2: #4c1d95;
+  --bg-3: #db2777;
+  --bg-4: #0891b2;
+  --ink: #ffffff;
+  --ink-dim: rgba(255, 255, 255, 0.72);
+  --ink-faint: rgba(255, 255, 255, 0.42);
+  --card: rgba(255, 255, 255, 0.10);
+  --card-strong: rgba(255, 255, 255, 0.18);
+  --card-border: rgba(255, 255, 255, 0.18);
+  --accent: #ffffff;
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+  --safe-left: env(safe-area-inset-left);
+  --safe-right: env(safe-area-inset-right);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
+               'Helvetica Neue', 'Inter', system-ui, sans-serif;
+  color: var(--ink);
+  background: linear-gradient(135deg, var(--bg-1), var(--bg-2), var(--bg-3), var(--bg-4));
+  background-size: 400% 400%;
+  animation: gradient-shift 22s ease infinite;
+  min-height: 100vh;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* The game UI shouldn't be selectable — text-page screens still are. */
+body.screen-game,
+body:not(.screen-text) #app,
+body:not(.screen-text) .footer {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* =========================================================
+   Layout shell
+   ========================================================= */
+
+#app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: calc(20px + var(--safe-top)) calc(20px + var(--safe-right))
+           24px calc(20px + var(--safe-left));
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 100dvh;
+}
+
+.footer {
+  text-align: center;
+  padding: 8px 0 calc(12px + var(--safe-bottom));
+  font-size: 12px;
+  color: var(--ink-faint);
+  letter-spacing: 0.04em;
+}
+.footer a { color: var(--ink-dim); text-decoration: none; }
+.footer a:hover { color: var(--ink); }
+
+/* =========================================================
+   Top bar
+   ========================================================= */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand {
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+.brand-emoji { display: inline-block; transform: translateY(-1px); }
+
+.topbar-right { display: flex; gap: 10px; align-items: center; }
+.day-pill {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.icon-btn {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  width: 36px; height: 36px;
+  border-radius: 999px;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--ink);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.icon-btn:active { transform: scale(0.92); }
+
+/* =========================================================
+   Swatches (game screen)
+   ========================================================= */
+
+.swatches {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.swatch {
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-lg);
+  position: relative;
+  box-shadow: var(--shadow), inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  transition: background 80ms linear;
+}
+.swatch-target { aspect-ratio: 1 / 1.05; }
+.swatch-label {
+  position: absolute;
+  top: 12px; left: 14px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* =========================================================
+   Timer
+   ========================================================= */
+
+.timer-row { display: flex; align-items: center; gap: 12px; }
+.timer {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 20px;
+  min-width: 56px;
+}
+.timer-urgent { color: #ffe066; animation: pulse 0.6s ease-in-out infinite; }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.timer-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.timer-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffe066, #ff6ec4);
+  border-radius: 999px;
+  transition: width 100ms linear;
+}
+
+/* =========================================================
+   Sliders — chunky, custom, gradient-tracked
+   ========================================================= */
+
+.sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.slider-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 52px;
+  align-items: center;
+  gap: 14px;
+}
+.slider-label {
+  font-weight: 800;
+  font-size: 18px;
+  text-align: center;
+  color: var(--ink);
+}
+.slider-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 18px;
+  text-align: right;
+  color: var(--ink);
+}
+
+/* Reset native slider, then build our own. */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 38px;
+  background: transparent;
+  outline: none;
+  --track: linear-gradient(to right, #000, #fff);
+}
+/* Webkit track */
+.slider::-webkit-slider-runnable-track {
+  height: 14px;
+  border-radius: 999px;
+  background: var(--track);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2), inset 0 2px 4px rgba(0,0,0,0.18);
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  margin-top: -8px;
+  transition: transform 80ms ease;
+}
+.slider:active::-webkit-slider-thumb { transform: scale(1.15); }
+
+/* Firefox track */
+.slider::-moz-range-track {
+  height: 14px;
+  border-radius: 999px;
+  background: var(--track);
+}
+.slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+/* =========================================================
+   Buttons
+   ========================================================= */
+
+.actions { display: flex; gap: 10px; }
+.btn {
+  flex: 1;
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  border: none;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  color: #1a1033;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  transition: transform 100ms ease, box-shadow 200ms ease;
+}
+.btn:active { transform: translateY(1px) scale(0.99); }
+.btn-primary { background: #ffffff; }
+.btn-flash { background: #c4f5d3; }
+
+/* =========================================================
+   Result screen
+   ========================================================= */
+
+.result-swatches {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.swatch-mini {
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow), inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+.swatch-mini-label {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.swatch-mini-rgb {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 16px;
+  align-self: flex-end;
+  background: rgba(0, 0, 0, 0.30);
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #fff;
+}
+
+.accuracy {
+  text-align: center;
+  padding: 14px 0 4px;
+}
+.accuracy-num {
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  background: linear-gradient(120deg, #ffe066, #ff6ec4, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.accuracy-sub {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--ink-dim);
+}
+
+.journey {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.journey-row {
+  height: 26px;
+  width: 100%;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.stat { text-align: center; }
+.stat-num {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.stat-label {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.come-back {
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-dim);
+  margin: 4px 0 0;
+}
+
+/* =========================================================
+   Tutorial overlay
+   ========================================================= */
+
+.tutorial {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 10, 31, 0.65);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  display: grid;
+  place-items: center;
+  z-index: 10;
+  padding: 24px;
+  animation: fade-in 200ms ease;
+}
+.tutorial.fade-out { animation: fade-out 220ms ease forwards; }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fade-out { to { opacity: 0; } }
+
+.tutorial-card {
+  max-width: 360px;
+  width: 100%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.10));
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.tutorial-icon { font-size: 48px; }
+.tutorial-card h2 {
+  margin: 8px 0 12px;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.tutorial-card p {
+  margin: 6px 0;
+  color: var(--ink-dim);
+  font-size: 15px;
+  line-height: 1.45;
+}
+.tutorial-card .btn { margin-top: 18px; }
+
+/* =========================================================
+   Confetti canvas
+   ========================================================= */
+
+.confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9;
+}
+
+/* =========================================================
+   Static text pages (privacy/about)
+   ========================================================= */
+
+.screen-text { background: linear-gradient(135deg, var(--bg-1), var(--bg-2)); }
+.text-page {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: calc(48px + var(--safe-top)) 24px calc(32px + var(--safe-bottom));
+  color: var(--ink);
+  line-height: 1.6;
+}
+.text-page h1 {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 16px;
+}
+.text-page p { color: var(--ink-dim); font-size: 16px; margin: 12px 0; }
+.text-page a {
+  color: #ffe066;
+  text-decoration: none;
+}
+.text-page a:hover { text-decoration: underline; }
+.text-page code {
+  background: rgba(255, 255, 255, 0.10);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* =========================================================
+   Tiny screens (older iPhones)
+   ========================================================= */
+
+@media (max-width: 360px) {
+  .swatch { border-radius: 22px; }
+  .accuracy-num { font-size: 48px; }
+  .sliders { padding: 14px; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  body { animation: none; }
+  .tutorial, .tutorial.fade-out { animation: none; }
+  .timer-urgent { animation: none; }
+}
