@@ -2,7 +2,7 @@
 // Orchestrates the three phases: ready → playing → result.
 // One puzzle per day, locked via stats.todayResult.dateKey === today.
 
-import { todayKey, dayNumber, targetForDate, fakeGlobalAverage } from './seed.js';
+import { todayKey, dayNumber, targetForDate, fakeGlobalAverage, randomTarget } from './seed.js';
 import { load, save, recordPlay } from './stats.js';
 import { shareText, copyToClipboard } from './share.js';
 import { burstConfetti } from './confetti.js';
@@ -62,6 +62,7 @@ function chime(type = 'submit') {
 
 // --- state ---
 const state = {
+  mode: 'daily', // 'daily' | 'free' — free play doesn't touch persistent stats
   phase: 'ready',
   target: [128, 128, 128],
   guess: [128, 128, 128],
@@ -79,8 +80,10 @@ const root = $('#app');
 
 function render() {
   const stats = load();
-  // Already played today? Skip straight to result with stored data.
-  if (state.phase === 'ready' && stats.todayResult && stats.todayResult.dateKey === todayKey()) {
+  // Already played today? Skip straight to the daily result with stored data.
+  // Free play has its own ready/playing/result lifecycle and never restores.
+  if (state.mode === 'daily' && state.phase === 'ready'
+      && stats.todayResult && stats.todayResult.dateKey === todayKey()) {
     state.target = stats.todayResult.target;
     state.guess = stats.todayResult.guess;
     state.journey = stats.todayResult.journey || [];
@@ -95,11 +98,14 @@ function render() {
 function renderGame(stats) {
   const day = dayNumber();
   const muted = stats.muted;
+  const pill = state.mode === 'free'
+    ? `<div class="day-pill day-pill-free">Free Play</div>`
+    : `<div class="day-pill">Day ${day}</div>`;
   root.innerHTML = `
     <header class="topbar">
       <div class="brand">Hue <span class="brand-emoji">🎨</span></div>
       <div class="topbar-right">
-        <div class="day-pill">Day ${day}</div>
+        ${pill}
         <button class="icon-btn" id="mute-btn" aria-label="${muted ? 'Unmute' : 'Mute'}">
           ${muted ? '🔇' : '🔊'}
         </button>
@@ -244,9 +250,11 @@ function finalize() {
   state.accuracy = accuracyOf(state.target, state.guess);
   state.phase = 'result';
 
-  // Persist result + streak.
-  const stats = load();
-  recordPlay(stats, todayKey(), state.accuracy, state.target, state.guess, state.journey);
+  // Persist result + streak — daily only. Free play never touches stats.
+  if (state.mode === 'daily') {
+    const stats = load();
+    recordPlay(stats, todayKey(), state.accuracy, state.target, state.guess, state.journey);
+  }
 
   vibrate([15, 40, 15]);
   chime('submit');
@@ -260,6 +268,7 @@ function renderResult(stats) {
   const day = dayNumber();
   const acc = state.accuracy;
   const accDisplay = acc.toFixed(1);
+  const isFree = state.mode === 'free';
   const globalAvg = fakeGlobalAverage();
   const ranks =
     acc >= globalAvg + 10 ? 'Way above average' :
@@ -267,11 +276,38 @@ function renderResult(stats) {
     acc >= globalAvg - 10 ? 'Just below average' :
     'Below average';
 
+  const pill = isFree
+    ? `<div class="day-pill day-pill-free">Free Play</div>`
+    : `<div class="day-pill">Day ${day}</div>`;
+
+  // Daily result: Share + a free-play CTA. Free result: Back to daily + Play again.
+  // Free play never affects streak/best/played, but the stats row still shows
+  // those persistent values (they reflect the user's daily history).
+  const actions = isFree
+    ? `<section class="actions actions-double">
+         <button class="btn btn-secondary" id="back-daily-btn">Back to Daily</button>
+         <button class="btn btn-primary" id="play-again-btn">Play Again</button>
+       </section>`
+    : `<section class="actions">
+         <button class="btn btn-primary" id="share-btn">Share</button>
+       </section>
+       <section class="actions actions-secondary">
+         <button class="btn btn-secondary" id="free-play-btn">Try Free Play →</button>
+       </section>`;
+
+  const subline = isFree
+    ? `<p class="come-back">Free play doesn't affect your streak or best.</p>`
+    : `<p class="come-back">Come back tomorrow for a new color.</p>`;
+
+  const subText = isFree
+    ? `Free play round`
+    : `${ranks} · global avg ${globalAvg}%`;
+
   root.innerHTML = `
     <header class="topbar">
       <div class="brand">Hue <span class="brand-emoji">🎨</span></div>
       <div class="topbar-right">
-        <div class="day-pill">Day ${day}</div>
+        ${pill}
         <button class="icon-btn" id="mute-btn" aria-label="${stats.muted ? 'Unmute' : 'Mute'}">
           ${stats.muted ? '🔇' : '🔊'}
         </button>
@@ -291,7 +327,7 @@ function renderResult(stats) {
 
     <section class="accuracy">
       <div class="accuracy-num">${accDisplay}%</div>
-      <div class="accuracy-sub">${ranks} · global avg ${globalAvg}%</div>
+      <div class="accuracy-sub">${subText}</div>
     </section>
 
     <section class="journey" aria-label="Your guess journey">
@@ -304,15 +340,55 @@ function renderResult(stats) {
       <div class="stat"><div class="stat-num">${stats.puzzlesPlayed}</div><div class="stat-label">Played</div></div>
     </section>
 
-    <section class="actions">
-      <button class="btn btn-primary" id="share-btn">Share</button>
-    </section>
+    ${actions}
 
-    <p class="come-back">Come back tomorrow for a new color.</p>
+    ${subline}
   `;
 
-  $('#share-btn').addEventListener('click', onShare);
   $('#mute-btn').addEventListener('click', onToggleMute);
+  if (isFree) {
+    $('#back-daily-btn').addEventListener('click', onBackToDaily);
+    $('#play-again-btn').addEventListener('click', onPlayAgain);
+  } else {
+    $('#share-btn').addEventListener('click', onShare);
+    $('#free-play-btn').addEventListener('click', onStartFreePlay);
+  }
+}
+
+// --- free play transitions ---
+function resetRoundState() {
+  clearInterval(state.timerHandle);
+  clearInterval(state.sampleHandle);
+  state.guess = [128, 128, 128];
+  state.journey = [];
+  state.startedAt = 0;
+  state.remaining = DURATION_MS;
+  state.hasInteracted = false;
+  state.accuracy = 0;
+}
+
+function onStartFreePlay() {
+  state.mode = 'free';
+  state.target = randomTarget();
+  resetRoundState();
+  state.phase = 'ready';
+  render();
+}
+
+function onPlayAgain() {
+  // Already in free mode; just spin up a fresh round with a new target.
+  state.target = randomTarget();
+  resetRoundState();
+  state.phase = 'ready';
+  render();
+}
+
+function onBackToDaily() {
+  state.mode = 'daily';
+  resetRoundState();
+  state.phase = 'ready';
+  // render() will auto-restore today's daily result if it was already played.
+  render();
 }
 
 async function onShare() {
