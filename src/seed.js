@@ -63,3 +63,15 @@ export function fakeGlobalAverage(now = new Date()) {
   const rng = xorshift32(hash32('hue-avg:' + todayKey(now)));
   return Math.round((62 + rng() * 20) * 10) / 10;
 }
+
+/**
+ * Non-deterministic target for free play — different every round, same
+ * "punchy color" distribution as the daily target.
+ */
+export function randomTarget() {
+  const channel = () => {
+    const r = Math.random();
+    return r < 0.5 ? Math.floor(r * 2 * 80) : 175 + Math.floor((r - 0.5) * 2 * 80);
+  };
+  return [channel(), channel(), channel()];
+}
