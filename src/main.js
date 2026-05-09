@@ -7,6 +7,7 @@ import { load, save, recordPlay } from './stats.js';
 import { shareText, copyToClipboard } from './share.js';
 import { burstConfetti } from './confetti.js';
 import { maybeShowTutorial } from './tutorial.js';
+import { wireAdminLink } from './admin.js';
 import { registerSW } from './pwa.js';
 
 // --- constants ---
@@ -430,11 +431,20 @@ function onToggleMute() {
   if (btn) btn.textContent = stats.muted ? '🔇' : '🔊';
 }
 
+function onAdminReset() {
+  state.mode = 'daily';
+  state.target = targetForDate();
+  resetRoundState();
+  state.phase = 'ready';
+  render();
+}
+
 // --- boot ---
 function boot() {
   state.target = targetForDate();
   registerSW();
   maybeShowTutorial();
+  wireAdminLink(onAdminReset);
   render();
 }
 

@@ -83,6 +83,7 @@ body:not(.screen-text) .footer {
 }
 .footer a { color: var(--ink-dim); text-decoration: none; }
 .footer a:hover { color: var(--ink); }
+.footer-admin { opacity: 0.55; }
 
 /* =========================================================
    Top bar
@@ -450,6 +451,73 @@ body:not(.screen-text) .footer {
   line-height: 1.45;
 }
 .tutorial-card .btn { margin-top: 18px; }
+
+/* =========================================================
+   Admin modal — code-gated daily reset
+   ========================================================= */
+
+.admin-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 10, 31, 0.65);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  display: grid;
+  place-items: center;
+  z-index: 11;
+  padding: 24px;
+  animation: fade-in 200ms ease;
+}
+.admin-modal.fade-out { animation: fade-out 220ms ease forwards; }
+
+.admin-card {
+  max-width: 360px;
+  width: 100%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.10));
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--radius-lg);
+  padding: 24px 22px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.admin-icon { font-size: 36px; line-height: 1; }
+.admin-card h2 {
+  margin: 6px 0 6px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.admin-card p {
+  margin: 0 0 14px;
+  color: var(--ink-dim);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.admin-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--card-border);
+  background: rgba(255, 255, 255, 0.10);
+  color: var(--ink);
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  letter-spacing: 0.04em;
+}
+.admin-input::placeholder { color: var(--ink-faint); }
+.admin-input:focus { border-color: rgba(255, 255, 255, 0.42); }
+.admin-input-error { border-color: #ff8b8b; }
+.admin-error {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #ffb3b3;
+}
+.admin-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+}
 
 /* =========================================================
    Confetti canvas
