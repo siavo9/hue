@@ -178,6 +178,16 @@ function formatTime(ms) {
   return `0:${String(s).padStart(2, '0')}`;
 }
 
+// Caption under the streak stat: tie-with-best gets a celebratory note,
+// otherwise show the longest streak so users can see what they're chasing.
+function streakSubline(stats) {
+  const cur = stats.currentStreak;
+  const best = stats.longestStreak;
+  if (best < 2) return '';
+  if (cur >= best) return `<div class="stat-sub stat-sub-best">🏆 Personal best</div>`;
+  return `<div class="stat-sub">Best: ${best}</div>`;
+}
+
 // --- gameplay ---
 function startPlaying() {
   state.phase = 'playing';
@@ -336,7 +346,11 @@ function renderResult(stats) {
     </section>
 
     <section class="stats-row">
-      <div class="stat"><div class="stat-num">${stats.currentStreak}</div><div class="stat-label">Streak 🔥</div></div>
+      <div class="stat">
+        <div class="stat-num">${stats.currentStreak}</div>
+        <div class="stat-label">Streak 🔥</div>
+        ${streakSubline(stats)}
+      </div>
       <div class="stat"><div class="stat-num">${stats.bestAccuracy.toFixed(1)}%</div><div class="stat-label">Best</div></div>
       <div class="stat"><div class="stat-num">${stats.puzzlesPlayed}</div><div class="stat-label">Played</div></div>
     </section>

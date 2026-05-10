@@ -399,6 +399,16 @@ body:not(.screen-text) .footer {
   letter-spacing: 0.08em;
   font-weight: 700;
 }
+.stat-sub {
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--ink-dim);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.stat-sub-best {
+  color: #f5a524;
+}
 
 .come-back {
   text-align: center;
