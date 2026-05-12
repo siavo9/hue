@@ -21,6 +21,16 @@ export function shareText({ day, accuracy, streak }) {
   return lines.join('\n');
 }
 
+/** Short streak-only summary for the "Copy my streak" share loop. */
+export function streakText({ streak, longestStreak }) {
+  const flames = '🔥'.repeat(Math.min(Math.max(streak, 1), 5));
+  const day = streak === 1 ? 'day' : 'days';
+  const lines = [`Hue 🎨 — ${streak} ${day} streak ${flames}`];
+  if (longestStreak > streak) lines.push(`Best: ${longestStreak}`);
+  lines.push(location.host || 'hue.app');
+  return lines.join('\n');
+}
+
 /** Copy text to clipboard. Returns true on success. */
 export async function copyToClipboard(text) {
   try {
