@@ -4,7 +4,7 @@
 
 import { todayKey, dayNumber, targetForDate, fakeGlobalAverage, randomTarget } from './seed.js';
 import { load, save, recordPlay } from './stats.js';
-import { shareText, copyToClipboard } from './share.js';
+import { shareText, streakText, copyToClipboard } from './share.js';
 import { burstConfetti } from './confetti.js';
 import { maybeShowTutorial } from './tutorial.js';
 import { wireAdminLink } from './admin.js';
@@ -299,8 +299,9 @@ function renderResult(stats) {
          <button class="btn btn-secondary" id="back-daily-btn">Back to Daily</button>
          <button class="btn btn-primary" id="play-again-btn">Play Again</button>
        </section>`
-    : `<section class="actions">
+    : `<section class="actions actions-double">
          <button class="btn btn-primary" id="share-btn">Share</button>
+         <button class="btn btn-secondary" id="copy-streak-btn">Copy my streak 🔥</button>
        </section>
        <section class="actions actions-secondary">
          <button class="btn btn-secondary" id="free-play-btn">Try Free Play →</button>
@@ -366,6 +367,7 @@ function renderResult(stats) {
     $('#play-again-btn').addEventListener('click', onPlayAgain);
   } else {
     $('#share-btn').addEventListener('click', onShare);
+    $('#copy-streak-btn').addEventListener('click', onCopyStreak);
     $('#free-play-btn').addEventListener('click', onStartFreePlay);
   }
 }
@@ -421,11 +423,23 @@ async function onShare() {
     } catch {/* user canceled or unsupported, fall through */}
   }
   const ok = await copyToClipboard(text);
-  flashShareButton(ok ? 'Copied!' : 'Copy failed');
+  flashButton('#share-btn', ok ? 'Copied!' : 'Copy failed');
 }
 
-function flashShareButton(label) {
-  const btn = $('#share-btn');
+// Streak-only share loop — clipboard-only, no native share sheet,
+// so it stays a one-tap action without an extra OS prompt.
+async function onCopyStreak() {
+  const stats = load();
+  const text = streakText({
+    streak: stats.currentStreak,
+    longestStreak: stats.longestStreak,
+  });
+  const ok = await copyToClipboard(text);
+  flashButton('#copy-streak-btn', ok ? 'Copied!' : 'Copy failed');
+}
+
+function flashButton(selector, label) {
+  const btn = $(selector);
   if (!btn) return;
   const original = btn.textContent;
   btn.textContent = label;
