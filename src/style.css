@@ -418,6 +418,38 @@ body:not(.screen-text) .footer {
 }
 
 /* =========================================================
+   Streak pips
+   ========================================================= */
+
+.streak-pips {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1px;
+  margin-top: 4px;
+  min-height: 18px;
+  line-height: 1;
+}
+
+.streak-pip {
+  font-size: 12px;
+  display: inline-block;
+}
+
+.streak-pip-empty {
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+.streak-overflow {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink-dim);
+  margin-left: 2px;
+  letter-spacing: -0.02em;
+}
+
+/* =========================================================
    Tutorial overlay
    ========================================================= */
 

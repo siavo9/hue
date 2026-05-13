@@ -32,6 +32,19 @@ function vibrate(ms) {
   try { if (navigator.vibrate) navigator.vibrate(ms); } catch {}
 }
 
+/** Build visible flame pips for the streak display (max 5 shown). */
+function streakPips(streak) {
+  if (streak <= 0) return '<span class="streak-pip streak-pip-empty">—</span>';
+  const show = Math.min(streak, 5);
+  const pips = Array.from({ length: show }, (_, i) => {
+    // Pips fade from dim to bright as they approach the most recent day.
+    const opacity = 0.35 + (0.65 * (i + 1)) / show;
+    return `<span class="streak-pip" style="opacity:${opacity.toFixed(2)}">🔥</span>`;
+  }).join('');
+  const overflow = streak > 5 ? `<span class="streak-overflow">+${streak - 5}</span>` : '';
+  return pips + overflow;
+}
+
 // Lazy-built audio context for the submit chime.
 let audioCtx = null;
 function chime(type = 'submit') {
@@ -349,7 +362,8 @@ function renderResult(stats) {
     <section class="stats-row">
       <div class="stat">
         <div class="stat-num">${stats.currentStreak}</div>
-        <div class="stat-label">Streak 🔥</div>
+        <div class="stat-label">Streak</div>
+        <div class="streak-pips" aria-label="${stats.currentStreak} day streak">${streakPips(stats.currentStreak)}</div>
         ${streakSubline(stats)}
       </div>
       <div class="stat"><div class="stat-num">${stats.bestAccuracy.toFixed(1)}%</div><div class="stat-label">Best</div></div>
@@ -436,6 +450,7 @@ async function onCopyStreak() {
   });
   const ok = await copyToClipboard(text);
   flashButton('#copy-streak-btn', ok ? 'Copied!' : 'Copy failed');
+  if (ok) chime('streak');
 }
 
 function flashButton(selector, label) {
