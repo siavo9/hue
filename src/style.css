@@ -604,6 +604,47 @@ body:not(.screen-text) .footer {
 }
 
 /* =========================================================
+   Game info / SEO description (below the playable game)
+   ========================================================= */
+
+.game-info {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 32px 24px 8px;
+  color: var(--ink-dim);
+  line-height: 1.6;
+  font-size: 15px;
+}
+.game-info h1 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+.game-info h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 24px 0 8px;
+  letter-spacing: -0.01em;
+}
+.game-info p { margin: 10px 0; }
+.game-info ol,
+.game-info ul {
+  padding-left: 22px;
+  margin: 8px 0;
+}
+.game-info li { margin: 6px 0; }
+.game-info li strong { color: var(--ink); font-weight: 600; }
+.game-info a {
+  color: #ffe066;
+  text-decoration: none;
+}
+.game-info a:hover { text-decoration: underline; }
+.game-info-cta { margin-top: 20px; }
+
+/* =========================================================
    Tiny screens (older iPhones)
    ========================================================= */
 
