@@ -110,11 +110,10 @@ function render() {
 }
 
 function renderGame(stats) {
-  const day = dayNumber();
   const muted = stats.muted;
   const pill = state.mode === 'free'
     ? `<div class="day-pill day-pill-free">Free Play</div>`
-    : `<div class="day-pill">Day ${day}</div>`;
+    : '';
   root.innerHTML = `
     <header class="topbar">
       <div class="brand">Hue <span class="brand-emoji">🎨</span></div>
@@ -289,7 +288,6 @@ function finalize() {
 
 // --- result screen ---
 function renderResult(stats) {
-  const day = dayNumber();
   const acc = state.accuracy;
   const accDisplay = acc.toFixed(1);
   const isFree = state.mode === 'free';
@@ -302,7 +300,7 @@ function renderResult(stats) {
 
   const pill = isFree
     ? `<div class="day-pill day-pill-free">Free Play</div>`
-    : `<div class="day-pill">Day ${day}</div>`;
+    : '';
 
   // Daily result: Share + a free-play CTA. Free result: Back to daily + Play again.
   // Free play never affects streak/best/played, but the stats row still shows
