@@ -9,25 +9,31 @@ function bar(accuracy) {
   return thresholds.map((t, i) => (accuracy >= t ? RAMP[i] : '⬛')).join('');
 }
 
-export function shareText({ day, accuracy, streak }) {
+/** Build a shareable URL — deep-links to a specific day's puzzle if seed given. */
+function shareUrl(seed) {
+  const host = location.host || 'hue.app';
+  return seed ? `${host}/?seed=${seed}` : host;
+}
+
+export function shareText({ day, accuracy, streak, seed }) {
   const acc = Math.round(accuracy);
   const lines = [
     `Hue 🎨 Day ${day}`,
     `Accuracy: ${acc}%`,
     bar(acc),
     `Streak: ${streak} 🔥`,
-    location.host || 'hue.app',
+    shareUrl(seed),
   ];
   return lines.join('\n');
 }
 
 /** Short streak-only summary for the "Copy my streak" share loop. */
-export function streakText({ streak, longestStreak }) {
+export function streakText({ streak, longestStreak, seed }) {
   const flames = '🔥'.repeat(Math.min(Math.max(streak, 1), 5));
   const day = streak === 1 ? 'day' : 'days';
   const lines = [`Hue 🎨 — ${streak} ${day} streak ${flames}`];
   if (longestStreak > streak) lines.push(`Best: ${longestStreak}`);
-  lines.push(location.host || 'hue.app');
+  lines.push(shareUrl(seed));
   return lines.join('\n');
 }
 
