@@ -13,6 +13,35 @@ export function todayKey(now = new Date()) {
   return `${y}-${m}-${d}`;
 }
 
+/** Compact local-date key like "20260508" — the ?seed= URL format. */
+export function compactKey(now = new Date()) {
+  return todayKey(now).replace(/-/g, '');
+}
+
+/**
+ * Parse ?seed=YYYYMMDD from the current URL. Returns a local Date for the
+ * encoded day, or null if absent / malformed. Validates that the parsed
+ * components round-trip (rejects e.g. "20260230").
+ */
+export function seedFromUrl() {
+  if (typeof location === 'undefined') return null;
+  const raw = new URLSearchParams(location.search).get('seed');
+  if (!raw || !/^\d{8}$/.test(raw)) return null;
+  const y = +raw.slice(0, 4);
+  const m = +raw.slice(4, 6);
+  const d = +raw.slice(6, 8);
+  const date = new Date(y, m - 1, d);
+  if (date.getFullYear() !== y || date.getMonth() !== m - 1 || date.getDate() !== d) {
+    return null;
+  }
+  return date;
+}
+
+/** Active "today" — ?seed= override if present and valid, else real now. */
+export function activeDate() {
+  return seedFromUrl() || new Date();
+}
+
 /** Day number since epoch. Used as the puzzle index (Day 1, Day 2, ...). */
 export function dayNumber(now = new Date()) {
   const local = new Date(now.getFullYear(), now.getMonth(), now.getDate());

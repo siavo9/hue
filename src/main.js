@@ -2,7 +2,7 @@
 // Orchestrates the three phases: ready → playing → result.
 // One puzzle per day, locked via stats.todayResult.dateKey === today.
 
-import { todayKey, dayNumber, targetForDate, fakeGlobalAverage, randomTarget } from './seed.js';
+import { todayKey, dayNumber, targetForDate, fakeGlobalAverage, randomTarget, activeDate, compactKey, seedFromUrl } from './seed.js';
 import { load, save, recordPlay } from './stats.js';
 import { shareText, streakText, copyToClipboard } from './share.js';
 import { burstConfetti } from './confetti.js';
@@ -78,6 +78,10 @@ function chime(type = 'submit') {
 const state = {
   mode: 'daily', // 'daily' | 'free' — free play doesn't touch persistent stats
   phase: 'ready',
+  // Resolved at boot from ?seed=YYYYMMDD if present, else the real local date.
+  // Pinning this once means a refresh mid-game (or past midnight) stays on
+  // the same puzzle, and share links can deep-link to a specific day.
+  now: new Date(),
   target: [128, 128, 128],
   guess: [128, 128, 128],
   journey: [],
@@ -97,7 +101,7 @@ function render() {
   // Already played today? Skip straight to the daily result with stored data.
   // Free play has its own ready/playing/result lifecycle and never restores.
   if (state.mode === 'daily' && state.phase === 'ready'
-      && stats.todayResult && stats.todayResult.dateKey === todayKey()) {
+      && stats.todayResult && stats.todayResult.dateKey === todayKey(state.now)) {
     state.target = stats.todayResult.target;
     state.guess = stats.todayResult.guess;
     state.journey = stats.todayResult.journey || [];
@@ -276,7 +280,7 @@ function finalize() {
   // Persist result + streak — daily only. Free play never touches stats.
   if (state.mode === 'daily') {
     const stats = load();
-    recordPlay(stats, todayKey(), state.accuracy, state.target, state.guess, state.journey);
+    recordPlay(stats, todayKey(state.now), state.accuracy, state.target, state.guess, state.journey);
   }
 
   vibrate([15, 40, 15]);
@@ -291,7 +295,7 @@ function renderResult(stats) {
   const acc = state.accuracy;
   const accDisplay = acc.toFixed(1);
   const isFree = state.mode === 'free';
-  const globalAvg = fakeGlobalAverage();
+  const globalAvg = fakeGlobalAverage(state.now);
   const ranks =
     acc >= globalAvg + 10 ? 'Way above average' :
     acc >= globalAvg ? 'Above average' :
@@ -423,9 +427,10 @@ function onBackToDaily() {
 async function onShare() {
   const stats = load();
   const text = shareText({
-    day: dayNumber(),
+    day: dayNumber(state.now),
     accuracy: state.accuracy,
     streak: stats.currentStreak,
+    seed: compactKey(state.now),
   });
   // Try native share first (better on iOS), fall back to clipboard.
   if (navigator.share) {
@@ -445,6 +450,7 @@ async function onCopyStreak() {
   const text = streakText({
     streak: stats.currentStreak,
     longestStreak: stats.longestStreak,
+    seed: compactKey(state.now),
   });
   const ok = await copyToClipboard(text);
   flashButton('#copy-streak-btn', ok ? 'Copied!' : 'Copy failed');
@@ -474,15 +480,30 @@ function onToggleMute() {
 
 function onAdminReset() {
   state.mode = 'daily';
-  state.target = targetForDate();
+  state.target = targetForDate(state.now);
   resetRoundState();
   state.phase = 'ready';
   render();
 }
 
+// Pin the URL to today's seed on first visit so a refresh (even after
+// midnight) keeps the player on the same puzzle they were playing.
+// If the user landed via a ?seed= deep link, we leave it untouched.
+function pinUrlToSeed() {
+  if (typeof history === 'undefined' || !history.replaceState) return;
+  if (seedFromUrl()) return;
+  try {
+    const url = new URL(location.href);
+    url.searchParams.set('seed', compactKey(state.now));
+    history.replaceState(null, '', url);
+  } catch {/* old browser, no URL — skip silently */}
+}
+
 // --- boot ---
 function boot() {
-  state.target = targetForDate();
+  state.now = activeDate();
+  state.target = targetForDate(state.now);
+  pinUrlToSeed();
   registerSW();
   maybeShowTutorial();
   wireAdminLink(onAdminReset);
