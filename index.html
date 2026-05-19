@@ -42,6 +42,12 @@
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
+    <nav class="gamenav" aria-label="Site navigation">
+      <a href="/" class="gamenav-link gamenav-brand">🎨 Hue</a>
+      <a href="#how-to-play" class="gamenav-link">How to Play</a>
+      <a href="https://zaksbraingames.com/" class="gamenav-link">🧠 Brain Games</a>
+    </nav>
+
     <main id="app" class="screen-game" aria-live="polite"></main>
 
     <section class="game-info" aria-label="How to play Hue">
@@ -53,14 +59,19 @@
         and blue to match it as closely as you can before the timer runs out.
       </p>
 
-      <h2>How to play</h2>
-      <ol>
-        <li><strong>Look at the target swatch</strong> on the left — that's the color you're chasing.</li>
-        <li><strong>Tap Start</strong> to begin a 30-second round.</li>
-        <li><strong>Drag the R, G and B sliders</strong> to mix your guess. The right-hand swatch updates live.</li>
-        <li><strong>Submit</strong> when you're happy with the match — or wait for the timer to run out.</li>
-        <li><strong>See your accuracy</strong>, build a streak, and share your score.</li>
-      </ol>
+      <h2 id="how-to-play">How to Play</h2>
+      <p>
+        See the colored square on the left? That's the color you need to match!
+        Mix red, green, and blue with the sliders to get as close as you can
+        before the timer runs out. Tap Submit when you like your color, or just
+        wait for time to end.
+      </p>
+      <ul class="howto-list">
+        <li><strong>🎯 Goal:</strong> match the target color in 30 seconds.</li>
+        <li><strong>🎚️ Sliders:</strong> drag R, G, and B to mix your color.</li>
+        <li><strong>✅ Submit:</strong> tap when you're happy with the match.</li>
+        <li><strong>🏆 Score:</strong> the closer your color, the higher your score!</li>
+      </ul>
 
       <h2>Tips for a better score</h2>
       <ul>
