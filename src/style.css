@@ -66,13 +66,48 @@ body:not(.screen-text) .footer {
 #app {
   max-width: 480px;
   margin: 0 auto;
-  padding: calc(20px + var(--safe-top)) calc(20px + var(--safe-right))
+  padding: 12px calc(20px + var(--safe-right))
            24px calc(20px + var(--safe-left));
   display: flex;
   flex-direction: column;
   gap: 18px;
-  min-height: 100dvh;
+  min-height: calc(100dvh - 60px);
 }
+
+/* =========================================================
+   Persistent site nav (above #app on every page)
+   ========================================================= */
+
+.gamenav {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: calc(12px + var(--safe-top)) calc(16px + var(--safe-right))
+           4px calc(16px + var(--safe-left));
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.gamenav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: background 120ms ease, transform 80ms ease;
+}
+.gamenav-link:hover { background: var(--card-strong); }
+.gamenav-link:active { transform: scale(0.96); }
+.gamenav-brand { font-weight: 800; font-size: 14px; }
 
 .footer {
   text-align: center;
@@ -602,6 +637,21 @@ body:not(.screen-text) .footer {
   border-radius: 6px;
   font-size: 14px;
 }
+.text-page h2 {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 28px 0 8px;
+}
+.text-page .howto-list {
+  padding-left: 22px;
+  margin: 8px 0;
+  color: var(--ink-dim);
+  font-size: 16px;
+}
+.text-page .howto-list li { margin: 6px 0; }
+.text-page .howto-list li strong { color: var(--ink); font-weight: 700; }
 
 /* =========================================================
    Game info / SEO description (below the playable game)
