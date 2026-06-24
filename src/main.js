@@ -207,11 +207,17 @@ function streakSubline(stats) {
 // --- gameplay ---
 function startPlaying() {
   state.phase = 'playing';
-  state.startedAt = performance.now();
+  // Date.now() instead of performance.now() — the latter can be clamped to
+  // a coarse precision (or effectively frozen) in some embedded webviews and
+  // privacy contexts, which leaves the countdown stuck at 0:30.
+  state.startedAt = Date.now();
   state.remaining = DURATION_MS;
   state.journey = [];
   state.hasInteracted = false;
 
+  // Defensive: kill any stragglers before re-arming.
+  clearInterval(state.timerHandle);
+  clearInterval(state.sampleHandle);
   state.timerHandle = setInterval(tick, 100);
   state.sampleHandle = setInterval(sampleJourney, SAMPLE_INTERVAL_MS);
 
@@ -220,7 +226,7 @@ function startPlaying() {
 }
 
 function tick() {
-  state.remaining = DURATION_MS - (performance.now() - state.startedAt);
+  state.remaining = DURATION_MS - (Date.now() - state.startedAt);
   if (state.remaining <= 0) {
     state.remaining = 0;
     onTimeUp();

@@ -3,7 +3,9 @@
 // which is intentional — every player crosses midnight in their own timezone
 // and gets the next puzzle then. Wordle does the same thing.)
 
-const EPOCH = new Date('2026-01-01T00:00:00');
+// Compare via UTC midnight stamps so DST boundaries don't subtract an hour
+// from the diff and shift the day count by one.
+const EPOCH_UTC = Date.UTC(2026, 0, 1);
 
 /** Local-date key like "2026-05-08". */
 export function todayKey(now = new Date()) {
@@ -44,9 +46,8 @@ export function activeDate() {
 
 /** Day number since epoch. Used as the puzzle index (Day 1, Day 2, ...). */
 export function dayNumber(now = new Date()) {
-  const local = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const diff = local - EPOCH;
-  return Math.floor(diff / (1000 * 60 * 60 * 24)) + 1;
+  const todayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.floor((todayUTC - EPOCH_UTC) / 86400000) + 1;
 }
 
 // Tiny xorshift PRNG. Deterministic, no deps.
